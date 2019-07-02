@@ -19,7 +19,7 @@ export const addComponent = async ({
   content
 }) => {
   // todo 验证
-  const createDate = Date.getTime()
+  const createDate = Date.now()
   db.componentPrototype.add({
     name,
     type,

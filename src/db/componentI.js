@@ -12,8 +12,8 @@ import db from './core'
  *  events: []
  * }
  */
-export const newComponent = async ({componentId, pageId, parentInfo = {}}) => {
-  const createDate = Date.getTime()
+export const newComponent = async ({componentP/* id */, page, parentInfo = {}}) => {
+  const createDate = Date.now()
   const parentId = parentInfo.id || ''
 
   let sortId = 0
@@ -22,25 +22,25 @@ export const newComponent = async ({componentId, pageId, parentInfo = {}}) => {
   }).reverse().sortBy('sortId').limit(1)
   sortId = fristBrother.sortId + 1
 
-  const componentInfo = await db.componentPrototype.get(componentId)
+  const componentInfo = await db.componentPrototype.get(componentP)
   db.componentInstance.add({
-    componentId,
-    pageId,
+    componentP,
+    page,
     sortId,
     parentId,
     props: componentInfo.props,
-    events: componentInfo.events,
-    slots: componentInfo.slots,
+    events: [],
+    slot: '',
     createDate,
     updateDate: createDate,
   })
 
 }
 
-export const updateCI = async ({componentId, targetSortId, props, events, nParent}) => {
+export const updateCI = async ({componentP, targetSortId, props, events, nParent}) => {
   db.transaction('rw', db.componentInstance, db.sort, async () => {
 
-    const cp = await db.componentInstance.get(componentId)
+    const cp = await db.componentInstance.get(componentP)
     const originSortId = cp.sortId
     let positionChanged = true
     do {
@@ -110,9 +110,11 @@ export const deleteCI = () => {
 }
 
 export const getCIById = async id => {
-  return await db.componentInstance.get(id)
+  const c = await db.componentInstance.get(id)
+  c.componentP = await db.componentPrototype.get(c.componentP)
+  return c
 }
 
-export const getCIs = async pageId => {
-    return await db.componentInstance.where('pageId').equals(pageId)
+export const getCIs = async page => {
+    return await db.componentInstance.where('page').equals(page)
 }
